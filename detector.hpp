@@ -1,207 +1,182 @@
 #ifndef DETECTOR_HPP
 #define DETECTOR_HPP
 
-namespace detail
+#ifdef __APPLE__
+#include <TargetConditionals.h> // needed for detecting if on mac or on ios
+#endif
+
+#if __cplusplus >= 201703L
+#define DETECT_INLINE inline
+#else
+#define DETECT_INLINE
+#endif
+
+namespace detect
 {
-    // void_t
-    template <typename... Ts>
-    using void_t = void;
+    namespace detail
+    {
+        struct tag_type_t
+        {
+            tag_type_t() = delete;
+            ~tag_type_t() = delete;
 
-    // is_same_v
-    template <typename T, typename U>
-    inline static constexpr bool is_same_v{false};
+            tag_type_t(tag_type_t const &) = delete;
+            tag_type_t &operator=(tag_type_t const &) = delete;
 
-    template <typename T>
-    inline static constexpr bool is_same_v<T, T>{true};
+            tag_type_t(tag_type_t &&) = delete;
+            tag_type_t &operator=(tag_type_t &&) = delete;
+        };
+    } // namespace detail
 
-    // is_any_of
-    template <typename T, typename... Ts>
-    inline static constexpr bool is_any_of_v{(is_same_v<T, Ts> || ...)};
-} // namespace detail
+    struct windows_t final : detail::tag_type_t
+    {
+    };
 
-// thx Jonathan Boccara
-// https://www.fluentcpp.com/2020/05/29/how-to-make-derived-classes-implement-more-than-assignment/
-template <template <typename...> class Expression, typename Attempt, typename... Ts>
-struct is_detected
-{
-    inline static constexpr bool value{false};
-};
+    struct linux_t final : detail::tag_type_t
+    {
+    };
 
-template <template <typename...> class Expression, typename... Ts>
-struct is_detected<Expression, detail::void_t<Expression<Ts...>>, Ts...>
-{
-    inline static constexpr bool value{true};
-};
+    struct macos_t final : detail::tag_type_t
+    {
+    };
 
-template <template <typename...> class Expression, typename... Ts>
-inline constexpr bool is_detected_v = is_detected<Expression, void, Ts...>::value;
+    struct ios_t final : detail::tag_type_t
+    {
+    };
 
-/// @brief A helper struct for tag-like types.
-struct tag_type_t
-{
-    tag_type_t() = delete;
+    struct android_t final : detail::tag_type_t
+    {
+    };
 
-    tag_type_t(tag_type_t const &) = delete;
-    tag_type_t &operator=(tag_type_t const &) = delete;
+    struct unix_t final : detail::tag_type_t
+    {
+    };
 
-    tag_type_t(tag_type_t &&) = delete;
-    tag_type_t &operator=(tag_type_t &&) = delete;
-};
 
-struct windows_t final : tag_type_t
-{
-};
+    template <typename O>
+    struct is_os;
 
-struct linux_t final : tag_type_t
-{
-};
-
-struct macos_t final : tag_type_t
-{
-};
-
-struct ios_t final : tag_type_t
-{
-};
-
-struct android_t final : tag_type_t
-{
-};
-
-struct unix_t final : tag_type_t
-{
-};
-
-template <typename T>
-concept os = detail::is_any_of_v<T, windows_t, linux_t, macos_t, ios_t, android_t, unix_t>;
-
-template <os O>
-struct is_os;
-
-template <>
-struct is_os<windows_t>
-{
+    template <>
+    struct is_os<windows_t>
+    {
 #if defined(_WIN32) || defined(WIN32) || defined(_WIN64)
-    inline static constexpr bool value{true};
+        DETECT_INLINE static constexpr bool value{true};
 #else
-    inline static constexpr bool value{false};
+        DETECT_INLINE static constexpr bool value{false};
 #endif
-};
+    };
 
-template <>
-struct is_os<linux_t>
-{
+    template <>
+    struct is_os<linux_t>
+    {
 #if defined(__linux__) && !defined(__android__)
-    inline static constexpr bool value{true};
+        DETECT_INLINE static constexpr bool value{true};
 #else
-    inline static constexpr bool value{false};
+        DETECT_INLINE static constexpr bool value{false};
 #endif
-};
+    };
 
-template <>
-struct is_os<macos_t>
-{
+    template <>
+    struct is_os<macos_t>
+    {
 #ifdef TARGET_OS_MAC
-    inline static constexpr bool value{true};
+        DETECT_INLINE static constexpr bool value{true};
 #else
-    inline static constexpr bool value{false};
+        DETECT_INLINE static constexpr bool value{false};
 #endif
-};
+    };
 
-template <>
-struct is_os<ios_t>
-{
+    template <>
+    struct is_os<ios_t>
+    {
 #if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
-    inline static constexpr bool value{true};
+        DETECT_INLINE static constexpr bool value{true};
 #else
-    inline static constexpr bool value{false};
+        DETECT_INLINE static constexpr bool value{false};
 #endif
-};
+    };
 
-template <>
-struct is_os<android_t>
-{
+    template <>
+    struct is_os<android_t>
+    {
 #ifdef __android__
-    inline static constexpr bool value{true};
+        DETECT_INLINE static constexpr bool value{true};
 #else
-    inline static constexpr bool value{false};
+        DETECT_INLINE static constexpr bool value{false};
 #endif
-};
+    };
 
-template <>
-struct is_os<unix_t>
-{
+    template <>
+    struct is_os<unix_t>
+    {
 #if !defined(__linux__) && defined(__unix__)
-    inline static constexpr bool value{true};
+        DETECT_INLINE static constexpr bool value{true};
 #else
-    inline static constexpr bool value{false};
+        DETECT_INLINE static constexpr bool value{false};
 #endif
-};
+    };
 
-template <os O>
-inline static constexpr bool is_os_v{is_os<O>::value};
+    template <typename O>
+    DETECT_INLINE static constexpr bool is_os_v{is_os<O>::value};
 
-inline static constexpr bool is_windows_v{is_os<windows_t>::value};
-inline static constexpr bool is_linux_v{is_os<linux_t>::value};
-inline static constexpr bool is_macos_v{is_os<macos_t>::value};
-inline static constexpr bool is_ios_v{is_os<ios_t>::value};
-inline static constexpr bool is_android_v{is_os<android_t>::value};
-inline static constexpr bool is_unix_v{is_os<unix_t>::value};
+    DETECT_INLINE static constexpr bool is_windows_v{is_os<windows_t>::value};
+    DETECT_INLINE static constexpr bool is_linux_v{is_os<linux_t>::value};
+    DETECT_INLINE static constexpr bool is_macos_v{is_os<macos_t>::value};
+    DETECT_INLINE static constexpr bool is_ios_v{is_os<ios_t>::value};
+    DETECT_INLINE static constexpr bool is_android_v{is_os<android_t>::value};
+    DETECT_INLINE static constexpr bool is_unix_v{is_os<unix_t>::value};
 
-struct gcc_t final : tag_type_t
-{
-};
+    struct gcc_t final : detail::tag_type_t
+    {
+    };
 
-struct clang_t final : tag_type_t
-{
-};
+    struct clang_t final : detail::tag_type_t
+    {
+    };
 
-struct msvc_t final : tag_type_t
-{
-};
+    struct msvc_t final : detail::tag_type_t
+    {
+    };
 
-template <typename T>
-concept compiler = detail::is_any_of_v<T, gcc_t, clang_t, msvc_t>;
+    template <typename C>
+    struct is_compiler;
 
-template <compiler C>
-struct is_compiler;
-
-template <>
-struct is_compiler<gcc_t>
-{
+    template <>
+    struct is_compiler<gcc_t>
+    {
 #ifdef __GNUC__
-    inline static constexpr bool value{true};
+        DETECT_INLINE static constexpr bool value{true};
 #else
-    inline static constexpr bool value{false};
+        DETECT_INLINE static constexpr bool value{false};
 #endif
-};
+    };
 
-template <>
-struct is_compiler<clang_t>
-{
+    template <>
+    struct is_compiler<clang_t>
+    {
 #ifdef __clang__
-    inline static constexpr bool value{true};
+        DETECT_INLINE static constexpr bool value{true};
 #else
-    inline static constexpr bool value{false};
+        DETECT_INLINE static constexpr bool value{false};
 #endif
-};
+    };
 
-template <>
-struct is_compiler<msvc_t>
-{
+    template <>
+    struct is_compiler<msvc_t>
+    {
 #ifdef _MSC_VER
-    inline static constexpr bool value{true};
+        DETECT_INLINE static constexpr bool value{true};
 #else
-    inline static constexpr bool value{false};
+        DETECT_INLINE static constexpr bool value{false};
 #endif
-};
+    };
 
-template <compiler C>
-inline static constexpr bool is_compiler_v{is_compiler<C>::value};
+    template <typename C>
+    DETECT_INLINE static constexpr bool is_compiler_v{is_compiler<C>::value};
 
-inline static constexpr bool is_gcc_v{is_compiler<gcc_t>::value};
-inline static constexpr bool is_clang_v{is_compiler<clang_t>::value};
-inline static constexpr bool is_msvc_v{is_compiler<msvc_t>::value};
-
+    DETECT_INLINE static constexpr bool is_gcc_v{is_compiler<gcc_t>::value};
+    DETECT_INLINE static constexpr bool is_clang_v{is_compiler<clang_t>::value};
+    DETECT_INLINE static constexpr bool is_msvc_v{is_compiler<msvc_t>::value};
+} // namespace detect
 
 #endif // !DETECTOR_HPP
