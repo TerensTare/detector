@@ -212,9 +212,9 @@ namespace detect
         struct is_std<cxx_11>
         {
 #if __cplusplus == 201103L
-                inline static constexpr bool value{true};
+                DETECT_INLINE static constexpr bool value{true};
 #else
-                inline static constexpr bool value{false};
+                DETECT_INLINE static constexpr bool value{false};
 #endif
         };
 
@@ -222,9 +222,9 @@ namespace detect
         struct is_std<cxx_14>
         {
 #if __cplusplus == 201402L
-                inline static constexpr bool value{true};
+                DETECT_INLINE static constexpr bool value{true};
 #else
-                inline static constexpr bool value{false};
+                DETECT_INLINE static constexpr bool value{false};
 #endif
         };
 
@@ -232,9 +232,9 @@ namespace detect
         struct is_std<cxx_17>
         {
 #if __cplusplus == 201703L
-                inline static constexpr bool value{true};
+                DETECT_INLINE static constexpr bool value{true};
 #else
-                inline static constexpr bool value{false};
+                DETECT_INLINE static constexpr bool value{false};
 #endif
         };
 
@@ -242,19 +242,19 @@ namespace detect
         struct is_std<cxx_20>
         {
 #if __cplusplus == 202002L
-                inline static constexpr bool value{true};
+                DETECT_INLINE static constexpr bool value{true};
 #else
-                inline static constexpr bool value{false};
+                DETECT_INLINE static constexpr bool value{false};
 #endif
         };
 
         template <typename T>
-        inline static constexpr bool is_std_v{is_std<T>::value};
+        DETECT_INLINE static constexpr bool is_std_v{is_std<T>::value};
 
-        inline static constexpr bool is_cxx_11{is_std<cxx_11>::value};
-        inline static constexpr bool is_cxx_14{is_std<cxx_14>::value};
-        inline static constexpr bool is_cxx_17{is_std<cxx_17>::value};
-        inline static constexpr bool is_cxx_20{is_std<cxx_20>::value};
+        DETECT_INLINE static constexpr bool is_cxx_11{is_std<cxx_11>::value};
+        DETECT_INLINE static constexpr bool is_cxx_14{is_std<cxx_14>::value};
+        DETECT_INLINE static constexpr bool is_cxx_17{is_std<cxx_17>::value};
+        DETECT_INLINE static constexpr bool is_cxx_20{is_std<cxx_20>::value};
 } // namespace detect
 
 #endif // !DETECTOR_HPP
