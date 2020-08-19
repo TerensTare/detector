@@ -1,5 +1,5 @@
 # detector
-A header-only C++ library for checking the host os/compiler in a modern way.
+A header-only C++ library for checking the host os/compiler, and much more in a modern way.
 
 
 ## Getting started
@@ -13,15 +13,15 @@ The library is header-only, so you just need to clone it from Github and `#inclu
     
 void print_os()
 {
-    if constexpr(is_windows_v)
+    if (is_windows_v)
     {
         std::cout << "windows";
     }
-    else if constexpr (is_linux_v)
+    else if (is_linux_v)
     {
         std::cout << "linux";
     }
-    else if constexpr (is_macos_v)
+    else if (is_macos_v)
     {
         std::cout << "macos";
     }
@@ -33,4 +33,5 @@ int main()
 }
 ```
 
+NOTE: If your compiler supports at least C++17, you can use `if constexpr` instead of just `if`.
 There are other os-es checks supported. If you want to contribute, please create a(n) issue/pull request.
