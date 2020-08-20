@@ -151,7 +151,7 @@ namespace detect
         template <>
         struct is_compiler<gcc_t>
         {
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__clang__)
                 DETECT_INLINE static constexpr bool value = true;
 #else
                 DETECT_INLINE static constexpr bool value = false;
@@ -171,7 +171,7 @@ namespace detect
         template <>
         struct is_compiler<msvc_t>
         {
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__clang__)
                 DETECT_INLINE static constexpr bool value = true;
 #else
                 DETECT_INLINE static constexpr bool value = false;
