@@ -11,6 +11,10 @@
 #define DETECT_INLINE
 #endif
 
+#if (defined(_M_AMD64) || defined(_M_X64) || defined(__amd64)) && !defined(__x86_64__)
+#define __x86_64__ 1
+#endif
+
 namespace detect
 {
         namespace detail
@@ -296,6 +300,171 @@ namespace detect
 
         DETECT_INLINE static constexpr bool is_debug_v = is_build<debug_t>::value;
         DETECT_INLINE static constexpr bool is_release_v = is_build<release_t>::value;
+
+        ///////////////////////
+        // simd instructions //
+        ///////////////////////
+
+        struct x86sse_t final : detail::tag_type_t
+        {
+        };
+
+        struct x86sse2_t final : detail::tag_type_t
+        {
+        };
+
+        struct sse_t final : detail::tag_type_t
+        {
+        };
+
+        struct sse2_t final : detail::tag_type_t
+        {
+        };
+
+        struct sse3_t final : detail::tag_type_t
+        {
+        };
+
+        struct ssse3_t final : detail::tag_type_t
+        {
+        };
+
+        struct sse4_1_t final : detail::tag_type_t
+        {
+        };
+
+        struct sse4_2_t final : detail::tag_type_t
+        {
+        };
+
+        struct avx_t final : detail::tag_type_t
+        {
+        };
+
+        struct avx2_t final : detail::tag_type_t
+        {
+        };
+
+        template <typename S>
+        struct is_simd;
+
+        template <>
+        struct is_simd<x86sse_t>
+        {
+#if defined(_M_IX86_FP) && (_M_IX86_FP == 1)
+                DETECT_INLINE static constexpr bool value = true;
+#else
+                DETECT_INLINE static constexpr bool value = false;
+#endif
+        };
+
+        template <>
+        struct is_simd<x86sse2_t>
+        {
+#if defined(_M_IX86_FP) && (_M_IX86_FP == 2)
+                DETECT_INLINE static constexpr bool value = true;
+#else
+                DETECT_INLINE static constexpr bool value = false;
+#endif
+        };
+
+        template <>
+        struct is_simd<sse_t>
+        {
+#ifdef __SSE__
+                DETECT_INLINE static constexpr bool value = true;
+#else
+                DETECT_INLINE static constexpr bool value = false;
+#endif
+        };
+
+        template <>
+        struct is_simd<sse2_t>
+        {
+#if defined(__SSE2__) || defined(__x86_x64__)
+                DETECT_INLINE static constexpr bool value = true;
+#else
+                DETECT_INLINE static constexpr bool value = false;
+#endif
+        };
+
+        template <>
+        struct is_simd<sse3_t>
+        {
+#ifdef __SSE3__
+                DETECT_INLINE static constexpr bool value = true;
+#else
+                DETECT_INLINE static constexpr bool value = false;
+#endif
+        };
+
+        template <>
+        struct is_simd<ssse3_t>
+        {
+#ifdef __SSSE3__
+                DETECT_INLINE static constexpr bool value = true;
+#else
+                DETECT_INLINE static constexpr bool value = false;
+#endif
+        };
+
+        template <>
+        struct is_simd<sse4_1_t>
+        {
+#ifdef __SSE4_1__
+                DETECT_INLINE static constexpr bool value = true;
+#else
+                DETECT_INLINE static constexpr bool value = false;
+#endif
+        };
+
+        template <>
+        struct is_simd<sse4_2_t>
+        {
+#ifdef __SSE4_2__
+                DETECT_INLINE static constexpr bool value = true;
+#else
+                DETECT_INLINE static constexpr bool value = false;
+#endif
+        };
+
+        template <>
+        struct is_simd<avx_t>
+        {
+#ifdef __AVX__
+                DETECT_INLINE static constexpr bool value = true;
+#else
+                DETECT_INLINE static constexpr bool value = false;
+#endif
+        };
+
+        template <>
+        struct is_simd<avx2_t>
+        {
+#ifdef __AVX2__
+                DETECT_INLINE static constexpr bool value = true;
+#else
+                DETECT_INLINE static constexpr bool value = false;
+#endif
+        };
+
+        template <typename S>
+        DETECT_INLINE constexpr bool is_simd_v = is_simd<S>::value;
+
+        DETECT_INLINE constexpr bool is_x86_sse_t = is_simd<x86sse_t>::value;
+        DETECT_INLINE constexpr bool is_x86_sse2_t = is_simd<x86sse2_t>::value;
+        DETECT_INLINE constexpr bool is_sse_t = is_simd<sse_t>::value;
+        DETECT_INLINE constexpr bool is_sse2_t = is_simd<sse2_t>::value;
+        DETECT_INLINE constexpr bool is_sse3_t = is_simd<sse3_t>::value;
+        DETECT_INLINE constexpr bool is_ssse3_t = is_simd<ssse3_t>::value;
+        DETECT_INLINE constexpr bool is_sse4_1_t = is_simd<sse4_1_t>::value;
+        DETECT_INLINE constexpr bool is_sse4_2_t = is_simd<sse4_2_t>::value;
+        DETECT_INLINE constexpr bool is_avx_t = is_simd<avx_t>::value;
+        DETECT_INLINE constexpr bool is_avx2_t = is_simd<avx2_t>::value;
 } // namespace detect
+
+#ifdef __x86_64__
+#undef __x86_64__
+#endif
 
 #endif // !DETECTOR_HPP
