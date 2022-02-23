@@ -149,6 +149,10 @@ namespace detect
         {
         };
 
+        struct mingw_t final : detail::tag_type_t
+        {
+        };
+
         template <typename C>
         struct is_compiler;
 
@@ -182,12 +186,23 @@ namespace detect
 #endif
         };
 
+        template <>
+        struct is_compiler<mingw_t>
+        {
+#if defined(__MINGW32__) || !defined(__MINGW64__)
+                DETECT_INLINE static constexpr bool value = true;
+#else
+                DETECT_INLINE static constexpr bool value = false;
+#endif
+        };
+
         template <typename C>
         DETECT_INLINE static constexpr bool is_compiler_v = is_compiler<C>::value;
 
         DETECT_INLINE static constexpr bool is_gcc_v = is_compiler<gcc_t>::value;
         DETECT_INLINE static constexpr bool is_clang_v = is_compiler<clang_t>::value;
         DETECT_INLINE static constexpr bool is_msvc_v = is_compiler<msvc_t>::value;
+        DETECT_INLINE static constexpr bool is_mingw_v = is_compiler<mingw_t>::value;
 
         ////////////////////////////////
         // C++ standard-related stuff //
