@@ -38,26 +38,32 @@ namespace detect
 
         struct windows_t final : detail::tag_type_t
         {
+            ~windows_t() = delete;
         };
 
         struct linux_t final : detail::tag_type_t
         {
+            ~linux_t() = delete;
         };
 
         struct macos_t final : detail::tag_type_t
         {
+            ~macos_t() = delete;
         };
 
         struct ios_t final : detail::tag_type_t
         {
+            ~ios_t() = delete;
         };
 
         struct android_t final : detail::tag_type_t
         {
+            ~android_t() = delete;
         };
 
         struct unix_t final : detail::tag_type_t
         {
+            ~unix_t() = delete;
         };
 
         template <typename O>
@@ -139,18 +145,22 @@ namespace detect
 
         struct gcc_t final : detail::tag_type_t
         {
+            ~gcc_t() = delete;
         };
 
         struct clang_t final : detail::tag_type_t
         {
+            ~clang_t() = delete;
         };
 
         struct msvc_t final : detail::tag_type_t
         {
+            ~msvc_t() = delete;
         };
 
         struct mingw_t final : detail::tag_type_t
         {
+            ~mingw_t() = delete;
         };
 
         template <typename C>
@@ -210,18 +220,22 @@ namespace detect
 
         struct cxx_11 final : detail::tag_type_t
         {
+            ~cxx_11() = delete;
         };
 
         struct cxx_14 final : detail::tag_type_t
         {
+            ~cxx_14() = delete;
         };
 
         struct cxx_17 final : detail::tag_type_t
         {
+            ~cxx_17() = delete;
         };
 
         struct cxx_20 final : detail::tag_type_t
         {
+            ~cxx_20() = delete;
         };
 
         template <typename T>
@@ -281,10 +295,12 @@ namespace detect
 
         struct debug_t final : detail::tag_type_t
         {
+            ~debug_t() = delete;
         };
 
         struct release_t final : detail::tag_type_t
         {
+            ~release_t() = delete;
         };
 
         template <typename T>
@@ -322,42 +338,52 @@ namespace detect
 
         struct x86sse_t final : detail::tag_type_t
         {
+            ~x86sse_t() = delete;
         };
 
         struct x86sse2_t final : detail::tag_type_t
         {
+            ~x86sse2_t() = delete;
         };
 
         struct sse_t final : detail::tag_type_t
         {
+            ~sse_t() = delete;
         };
 
         struct sse2_t final : detail::tag_type_t
         {
+            ~sse2_t() = delete;
         };
 
         struct sse3_t final : detail::tag_type_t
         {
+            ~sse3_t() = delete;
         };
 
         struct ssse3_t final : detail::tag_type_t
         {
+            ~ssse3_t() = delete;
         };
 
         struct sse4_1_t final : detail::tag_type_t
         {
+            ~sse4_1_t() = delete;
         };
 
         struct sse4_2_t final : detail::tag_type_t
         {
+            ~sse4_2_t() = delete;
         };
 
         struct avx_t final : detail::tag_type_t
         {
+            ~avx_t() = delete;
         };
 
         struct avx2_t final : detail::tag_type_t
         {
+            ~avx2_t() = delete;
         };
 
         template <typename S>
