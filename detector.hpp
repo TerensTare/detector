@@ -5,422 +5,381 @@
 #include <TargetConditionals.h> // needed for detecting if on mac or on ios
 #endif
 
-#if __cplusplus >= 201703L
-#define DETECT_INLINE inline
+#if (defined(_M_AMD64) || defined(_M_X64) || defined(__amd64)) && !defined(__x86_64__)
+#define DETECTED_X86_64
+#endif
+
+// MSVC doesn't correctly report __cplusplus unless you pass /Zc:__cplusplus
+#ifdef _MSVC_LANG
+#define DETECTED_CXX _MSVC_LANG
 #else
-#define DETECT_INLINE
+#define DETECTED_CXX __cplusplus
 #endif
 
-#if (defined(_M_AMD64) || defined(_M_X64) || defined(__amd64)) &&              \
-    !defined(__x86_64__)
-#define __x86_64__ 1
-#endif
+namespace detect
+{
+    //////////////////////
+    // os-related stuff //
+    //////////////////////
 
-namespace detect {
-namespace detail {
-struct tag_type_t {
-  tag_type_t() = delete;
-  ~tag_type_t() = delete;
+    struct windows_t final
+    {
+        windows_t() = delete;
+    };
 
-  tag_type_t(tag_type_t const &) = delete;
-  tag_type_t &operator=(tag_type_t const &) = delete;
+    struct linux_t final
+    {
+        linux_t() = delete;
+    };
 
-  tag_type_t(tag_type_t &&) = delete;
-  tag_type_t &operator=(tag_type_t &&) = delete;
-};
-} // namespace detail
+    struct macos_t final
+    {
+        macos_t() = delete;
+    };
 
-//////////////////////
-// os-related stuff //
-//////////////////////
+    struct ios_t final
+    {
+        ios_t() = delete;
+    };
 
-struct windows_t final : detail::tag_type_t {
-  ~windows_t() = delete;
-};
+    struct android_t final
+    {
+        android_t() = delete;
+    };
 
-struct linux_t final : detail::tag_type_t {
-  ~linux_t() = delete;
-};
+    struct unix_t final
+    {
+        unix_t() = delete;
+    };
 
-struct macos_t final : detail::tag_type_t {
-  ~macos_t() = delete;
-};
+    template <typename O>
+    static constexpr bool is_os_v = false;
 
-struct ios_t final : detail::tag_type_t {
-  ~ios_t() = delete;
-};
-
-struct android_t final : detail::tag_type_t {
-  ~android_t() = delete;
-};
-
-struct unix_t final : detail::tag_type_t {
-  ~unix_t() = delete;
-};
-
-template <typename O> struct is_os;
-
-template <> struct is_os<windows_t> {
 #if defined(_WIN32) || defined(WIN32) || defined(_WIN64)
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_os_v<windows_t> = true;
 #endif
-};
 
-template <> struct is_os<linux_t> {
 #if defined(__linux__) && !defined(__android__)
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_os_v<linux_t> = true;
 #endif
-};
 
-template <> struct is_os<macos_t> {
 #ifdef TARGET_OS_MAC
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_os_v<macos_t> = true;
 #endif
-};
 
-template <> struct is_os<ios_t> {
 #if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_os_v<ios_t> = true;
 #endif
-};
 
-template <> struct is_os<android_t> {
 #ifdef __android__
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_os_v<android_t> = true;
 #endif
-};
 
-template <> struct is_os<unix_t> {
 #if !defined(__linux__) && defined(__unix__)
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_os_v<linux_t> = true;
 #endif
-};
 
-template <typename O>
-DETECT_INLINE static constexpr bool is_os_v = is_os<O>::value;
+    static constexpr bool is_windows_v = is_os_v<windows_t>;
+    static constexpr bool is_linux_v = is_os_v<linux_t>;
+    static constexpr bool is_macos_v = is_os_v<macos_t>;
+    static constexpr bool is_ios_v = is_os_v<ios_t>;
+    static constexpr bool is_android_v = is_os_v<android_t>;
+    static constexpr bool is_unix_v = is_os_v<unix_t>;
 
-DETECT_INLINE static constexpr bool is_windows_v = is_os<windows_t>::value;
-DETECT_INLINE static constexpr bool is_linux_v = is_os<linux_t>::value;
-DETECT_INLINE static constexpr bool is_macos_v = is_os<macos_t>::value;
-DETECT_INLINE static constexpr bool is_ios_v = is_os<ios_t>::value;
-DETECT_INLINE static constexpr bool is_android_v = is_os<android_t>::value;
-DETECT_INLINE static constexpr bool is_unix_v = is_os<unix_t>::value;
+    template <typename O>
+    struct is_os
+    {
+        static constexpr bool value = is_os_v<O>;
+    };
 
-////////////////////////////
-// compiler-related stuff //
-////////////////////////////
+    ////////////////////////////
+    // compiler-related stuff //
+    ////////////////////////////
 
-struct gcc_t final : detail::tag_type_t {
-  ~gcc_t() = delete;
-};
+    struct gcc_t final
+    {
+        gcc_t() = delete;
+    };
 
-struct clang_t final : detail::tag_type_t {
-  ~clang_t() = delete;
-};
+    struct clang_t final
+    {
+        clang_t() = delete;
+    };
 
-struct msvc_t final : detail::tag_type_t {
-  ~msvc_t() = delete;
-};
+    struct msvc_t final
+    {
+        msvc_t() = delete;
+    };
 
-struct mingw_t final : detail::tag_type_t {
-  ~mingw_t() = delete;
-};
+    struct mingw_t final
+    {
+        mingw_t() = delete;
+    };
 
-template <typename C> struct is_compiler;
+    template <typename C>
+    static constexpr bool is_compiler_v = false;
 
-template <> struct is_compiler<gcc_t> {
 #if defined(__GNUC__) && !defined(__clang__)
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_compiler_v<gcc_t> = true;
 #endif
-};
 
-template <> struct is_compiler<clang_t> {
 #ifdef __clang__
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_compiler_v<clang_t> = true;
 #endif
-};
 
-template <> struct is_compiler<msvc_t> {
 #if defined(_MSC_VER) && !defined(__clang__)
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_compiler_v<msvc_t> = true;
 #endif
-};
 
-template <> struct is_compiler<mingw_t> {
 #if defined(__MINGW32__) || !defined(__MINGW64__)
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_compiler_v<mingw_t> = true;
 #endif
-};
 
-template <typename C>
-DETECT_INLINE static constexpr bool is_compiler_v = is_compiler<C>::value;
+    static constexpr bool is_gcc_v = is_compiler_v<gcc_t>;
+    static constexpr bool is_clang_v = is_compiler_v<clang_t>;
+    static constexpr bool is_msvc_v = is_compiler_v<msvc_t>;
+    static constexpr bool is_mingw_v = is_compiler_v<mingw_t>;
 
-DETECT_INLINE static constexpr bool is_gcc_v = is_compiler<gcc_t>::value;
-DETECT_INLINE static constexpr bool is_clang_v = is_compiler<clang_t>::value;
-DETECT_INLINE static constexpr bool is_msvc_v = is_compiler<msvc_t>::value;
-DETECT_INLINE static constexpr bool is_mingw_v = is_compiler<mingw_t>::value;
+    template <typename C>
+    struct is_compiler
+    {
+        static constexpr bool value = is_compiler_v<C>;
+    };
 
-////////////////////////////////
-// C++ standard-related stuff //
-////////////////////////////////
+    ////////////////////////////////
+    // C++ standard-related stuff //
+    ////////////////////////////////
 
-struct cxx_11 final : detail::tag_type_t {
-  ~cxx_11() = delete;
-};
+    struct cxx_11 final
+    {
+        cxx_11() = delete;
+    };
 
-struct cxx_14 final : detail::tag_type_t {
-  ~cxx_14() = delete;
-};
+    struct cxx_14 final
+    {
+        cxx_14() = delete;
+    };
 
-struct cxx_17 final : detail::tag_type_t {
-  ~cxx_17() = delete;
-};
+    struct cxx_17 final
+    {
+        cxx_17() = delete;
+    };
 
-struct cxx_20 final : detail::tag_type_t {
-  ~cxx_20() = delete;
-};
+    struct cxx_20 final
+    {
+        cxx_20() = delete;
+    };
 
-template <typename T> struct is_std;
+    struct cxx_23 final
+    {
+        cxx_23() = delete;
+    };
 
-template <> struct is_std<cxx_11> {
-#if __cplusplus == 201103L
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
-#endif
-};
+    template <typename T>
+    static constexpr bool is_std_v = false;
 
-template <> struct is_std<cxx_14> {
-#if __cplusplus == 201402L
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
-#endif
-};
+    template <>
+    constexpr bool is_std_v<cxx_11> = DETECTED_CXX == 201103L;
 
-template <> struct is_std<cxx_17> {
-#if __cplusplus == 201703L
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
-#endif
-};
+    template <>
+    constexpr bool is_std_v<cxx_14> = DETECTED_CXX == 201402L;
 
-template <> struct is_std<cxx_20> {
-#if __cplusplus == 202002L
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
-#endif
-};
+    template <>
+    constexpr bool is_std_v<cxx_17> = DETECTED_CXX == 201703L;
 
-template <typename T>
-DETECT_INLINE static constexpr bool is_std_v = is_std<T>::value;
+    template <>
+    constexpr bool is_std_v<cxx_20> = DETECTED_CXX == 202002L;
 
-DETECT_INLINE static constexpr bool is_cxx_11 = is_std<cxx_11>::value;
-DETECT_INLINE static constexpr bool is_cxx_14 = is_std<cxx_14>::value;
-DETECT_INLINE static constexpr bool is_cxx_17 = is_std<cxx_17>::value;
-DETECT_INLINE static constexpr bool is_cxx_20 = is_std<cxx_20>::value;
+    template <>
+    constexpr bool is_std_v<cxx_23> = DETECTED_CXX == 202302L;
 
-/////////////////////////////////
-// debug/release related stuff //
-/////////////////////////////////
+    static constexpr bool is_cxx_11 = is_std_v<cxx_11>;
+    static constexpr bool is_cxx_14 = is_std_v<cxx_14>;
+    static constexpr bool is_cxx_17 = is_std_v<cxx_17>;
+    static constexpr bool is_cxx_20 = is_std_v<cxx_20>;
+    static constexpr bool is_cxx_23 = is_std_v<cxx_23>;
 
-struct debug_t final : detail::tag_type_t {
-  ~debug_t() = delete;
-};
+    template <typename S>
+    struct is_std
+    {
+        static constexpr bool value = is_std_v<S>;
+    };
 
-struct release_t final : detail::tag_type_t {
-  ~release_t() = delete;
-};
+    /////////////////////////////////
+    // debug/release related stuff //
+    /////////////////////////////////
 
-template <typename T> struct is_build;
+    struct debug_t final
+    {
+        debug_t() = delete;
+    };
 
-template <> struct is_build<debug_t> {
+    struct release_t final
+    {
+        release_t() = delete;
+    };
+
+    template <typename B>
+    static constexpr bool is_build_v = false;
+
 #if defined(_DEBUG) || defined(DEBUG)
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_build_v<debug_t> = true;
 #endif
-};
 
-template <> struct is_build<release_t> {
 #if defined(NDEBUG) || !(defined(DEBUG) && defined(_DEBUG))
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_build_v<release_t> = true;
 #endif
-};
 
-template <typename T>
-DETECT_INLINE static constexpr bool is_build_v = is_build<T>::value;
+    static constexpr bool is_debug_v = is_build_v<debug_t>;
+    static constexpr bool is_release_v = is_build_v<release_t>;
 
-DETECT_INLINE static constexpr bool is_debug_v = is_build<debug_t>::value;
-DETECT_INLINE static constexpr bool is_release_v = is_build<release_t>::value;
+    template <typename B>
+    struct is_build
+    {
+        static constexpr bool value = is_build_v<B>;
+    };
 
-///////////////////////
-// simd instructions //
-///////////////////////
+    ///////////////////////
+    // simd instructions //
+    ///////////////////////
 
-struct x86sse_t final : detail::tag_type_t {
-  ~x86sse_t() = delete;
-};
+    struct x86sse_t final
+    {
+        x86sse_t() = delete;
+    };
 
-struct x86sse2_t final : detail::tag_type_t {
-  ~x86sse2_t() = delete;
-};
+    struct x86sse2_t final
+    {
+        x86sse2_t() = delete;
+    };
 
-struct sse_t final : detail::tag_type_t {
-  ~sse_t() = delete;
-};
+    struct sse_t final
+    {
+        sse_t() = delete;
+    };
 
-struct sse2_t final : detail::tag_type_t {
-  ~sse2_t() = delete;
-};
+    struct sse2_t final
+    {
+        sse2_t() = delete;
+    };
 
-struct sse3_t final : detail::tag_type_t {
-  ~sse3_t() = delete;
-};
+    struct sse3_t final
+    {
+        sse3_t() = delete;
+    };
 
-struct ssse3_t final : detail::tag_type_t {
-  ~ssse3_t() = delete;
-};
+    struct ssse3_t final
+    {
+        ssse3_t() = delete;
+    };
 
-struct sse4_1_t final : detail::tag_type_t {
-  ~sse4_1_t() = delete;
-};
+    struct sse4_1_t final
+    {
+        sse4_1_t() = delete;
+    };
 
-struct sse4_2_t final : detail::tag_type_t {
-  ~sse4_2_t() = delete;
-};
+    struct sse4_2_t final
+    {
+        sse4_2_t() = delete;
+    };
 
-struct avx_t final : detail::tag_type_t {
-  ~avx_t() = delete;
-};
+    struct avx_t final
+    {
+        avx_t() = delete;
+    };
 
-struct avx2_t final : detail::tag_type_t {
-  ~avx2_t() = delete;
-};
+    struct avx2_t final
+    {
+        avx2_t() = delete;
+    };
 
-template <typename S> struct is_simd;
+    template <typename S>
+    static constexpr bool is_simd_v = false;
 
-template <> struct is_simd<x86sse_t> {
 #if defined(_M_IX86_FP) && (_M_IX86_FP == 1)
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_simd_v<x86sse_t> = true;
 #endif
-};
 
-template <> struct is_simd<x86sse2_t> {
 #if defined(_M_IX86_FP) && (_M_IX86_FP == 2)
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_simd_v<x86sse2_t> = true;
 #endif
-};
 
-template <> struct is_simd<sse_t> {
 #ifdef __SSE__
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_simd_v<sse_t> = true;
 #endif
-};
 
-template <> struct is_simd<sse2_t> {
-#if defined(__SSE2__) || defined(__x86_x64__)
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+#if defined(__SSE2__) || defined(__x86_x64__) || defined(DETECTED_X86_64)
+    template <>
+    constexpr bool is_simd_v<sse2_t> = true;
 #endif
-};
 
-template <> struct is_simd<sse3_t> {
 #ifdef __SSE3__
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_simd_v<sse3_t> = true;
 #endif
-};
 
-template <> struct is_simd<ssse3_t> {
 #ifdef __SSSE3__
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_simd_v<ssse3_t> = true;
 #endif
-};
 
-template <> struct is_simd<sse4_1_t> {
 #ifdef __SSE4_1__
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_simd_v<sse4_1_t> = true;
 #endif
-};
 
-template <> struct is_simd<sse4_2_t> {
 #ifdef __SSE4_2__
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_simd_v<sse4_2_t> = true;
 #endif
-};
 
-template <> struct is_simd<avx_t> {
 #ifdef __AVX__
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_simd_v<avx_t> = true;
 #endif
-};
 
-template <> struct is_simd<avx2_t> {
 #ifdef __AVX2__
-  DETECT_INLINE static constexpr bool value = true;
-#else
-  DETECT_INLINE static constexpr bool value = false;
+    template <>
+    constexpr bool is_simd_v<avx2_t> = true;
 #endif
-};
 
-template <typename S>
-DETECT_INLINE constexpr bool is_simd_v = is_simd<S>::value;
+    static constexpr bool is_x86_sse_v = is_simd_v<x86sse_t>;
+    static constexpr bool is_x86_sse2_v = is_simd_v<x86sse2_t>;
+    static constexpr bool is_sse_v = is_simd_v<sse_t>;
+    static constexpr bool is_sse2_v = is_simd_v<sse2_t>;
+    static constexpr bool is_sse3_v = is_simd_v<sse3_t>;
+    static constexpr bool is_ssse3_v = is_simd_v<ssse3_t>;
+    static constexpr bool is_sse4_1_v = is_simd_v<sse4_1_t>;
+    static constexpr bool is_sse4_2_v = is_simd_v<sse4_2_t>;
+    static constexpr bool is_avx_v = is_simd_v<avx_t>;
+    static constexpr bool is_avx2_v = is_simd_v<avx2_t>;
 
-DETECT_INLINE constexpr bool is_x86_sse_t = is_simd<x86sse_t>::value;
-DETECT_INLINE constexpr bool is_x86_sse2_t = is_simd<x86sse2_t>::value;
-DETECT_INLINE constexpr bool is_sse_t = is_simd<sse_t>::value;
-DETECT_INLINE constexpr bool is_sse2_t = is_simd<sse2_t>::value;
-DETECT_INLINE constexpr bool is_sse3_t = is_simd<sse3_t>::value;
-DETECT_INLINE constexpr bool is_ssse3_t = is_simd<ssse3_t>::value;
-DETECT_INLINE constexpr bool is_sse4_1_t = is_simd<sse4_1_t>::value;
-DETECT_INLINE constexpr bool is_sse4_2_t = is_simd<sse4_2_t>::value;
-DETECT_INLINE constexpr bool is_avx_t = is_simd<avx_t>::value;
-DETECT_INLINE constexpr bool is_avx2_t = is_simd<avx2_t>::value;
+    template <typename S>
+    struct is_simd
+    {
+        static constexpr bool value = is_simd_v<S>;
+    };
 } // namespace detect
 
-#ifdef __x86_64__
-#undef __x86_64__
+#ifdef DETECTED_X86_64
+#undef DETECTED_X86_64
 #endif
+
+#undef DETECTED_CXX
 
 #endif // !DETECTOR_HPP

@@ -13,15 +13,15 @@ The library is header-only, so you just need to clone it from Github and `#inclu
     
 void print_os()
 {
-    if (is_windows_v)
+    if (detect::is_windows_v)
     {
         std::cout << "windows";
     }
-    else if (is_linux_v)
+    else if (detect::is_linux_v)
     {
         std::cout << "linux";
     }
-    else if (is_macos_v)
+    else if (detect::is_macos_v)
     {
         std::cout << "macos";
     }
